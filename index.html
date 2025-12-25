@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 Community Music Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(29, 185, 84, 0.3);
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .api-setup {
+            background: #282828;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #404040;
+        }
+
+        .api-setup.connected {
+            border-color: #1db954;
+            background: linear-gradient(135deg, #1a3a25 0%, #1a2a25 100%);
+        }
+
+        .api-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            margin-top: 10px;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: #1db954;
+        }
+
+        .add-section {
+            background: #282828;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b3b3b3;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 2px solid #404040;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1db954;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(29, 185, 84, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #404040;
+            color: #fff;
+            margin-left: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #505050;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #282828;
+            padding-bottom: 12px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #b3b3b3;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #1db954;
+            border-bottom-color: #1db954;
+        }
+
+        .tab:hover {
+            color: #fff;
+        }
+
+        .songs-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .song-card {
+            background: #282828;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .song-card:hover {
+            background: #303030;
+            border-color: #1db954;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(29, 185, 84, 0.2);
+        }
+
+        .song-thumbnail {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .song-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .song-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .song-artist {
+            font-size: 14px;
+            color: #b3b3b3;
+            margin-bottom: 8px;
+        }
+
+        .song-meta {
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .song-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #404040;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+
+        .btn-icon:hover {
+            background: #1db954;
+            transform: scale(1.1);
+        }
+
+        audio {
+            width: 100%;
+            height: 40px;
+            margin-top: 12px;
+            border-radius: 8px;
+        }
+
+        audio::-webkit-media-controls-panel {
+            background: #1a1a1a;
+        }
+
+        .search-bar {
+            background: #282828;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #b3b3b3;
+        }
+
+        .spinner {
+            border: 4px solid #282828;
+            border-top: 4px solid #1db954;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #b3b3b3;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .status-message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-success {
+            background: rgba(29, 185, 84, 0.2);
+            border: 2px solid #1db954;
+            color: #1db954;
+        }
+
+        .status-error {
+            background: rgba(232, 74, 74, 0.2);
+            border: 2px solid #e84a4a;
+            color: #e84a4a;
+        }
+
+        @media (max-width: 768px) {
+            .song-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .song-thumbnail {
+                width: 120px;
+                height: 120px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #1db954;
+            color: #000;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        a {
+            color: #1db954;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Community Music Library</h1>
+            <p>Your personal music streaming service. No ads, no limits, just music.</p>
+        </div>
+
+        <div id="apiSetup" class="api-setup">
+            <h3>🔑 Connect Your Account</h3>
+            <p style="color: #b3b3b3; margin: 8px 0 12px 0;">
+                Get your API key from <a href="https://codewords.agemo.ai/account/keys" target="_blank">CodeWords Dashboard</a>
+            </p>
+            <input 
+                type="password" 
+                id="apiKeyInput" 
+                class="api-input" 
+                placeholder="Paste your CodeWords API key here (cwk-...)"
+            >
+            <button onclick="saveApiKey()" class="btn btn-primary" style="margin-top: 12px;">
+                Connect
+            </button>
+        </div>
+
+        <div id="mainContent" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('add', event)">➕ Add Song</button>
+                <button class="tab" onclick="switchTab('library', event)">📚 My Library</button>
+                <button class="tab" onclick="switchTab('search', event)">🔍 Search</button>
+            </div>
+
+            <div id="statusMessage"></div>
+
+            <div id="addTab" class="add-section">
+                <h2 style="margin-bottom: 20px;">Add Song to Library</h2>
+                <div class="input-group">
+                    <label>YouTube URL</label>
+                    <input 
+                        type="text" 
+                        id="youtubeUrl" 
+                        class="input-field" 
+                        placeholder="https://www.youtube.com/watch?v=..."
+                    >
+                </div>
+                <div class="input-group">
+                    <label>Category (Optional)</label>
+                    <input 
+                        type="text" 
+                        id="category" 
+                        class="input-field" 
+                        placeholder="Pop, Rock, Jazz, etc."
+                        value="Music"
+                    >
+                </div>
+                <button onclick="addSong()" class="btn btn-primary" id="addBtn">
+                    📥 Download & Add to Library
+                </button>
+            </div>
+
+            <div id="libraryTab" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Your Music Library</h2>
+                    <button onclick="loadLibrary()" class="btn btn-secondary">
+                        🔄 Refresh
+                    </button>
+                </div>
+                <div id="libraryContent"></div>
+            </div>
+
+            <div id="searchTab" class="hidden">
+                <div class="search-bar">
+                    <div class="input-group" style="flex: 1; margin: 0;">
+                        <label>Search Query</label>
+                        <input 
+                            type="text" 
+                            id="searchQuery" 
+                            class="input-field" 
+                            placeholder="Song title or artist name"
+                        >
+                    </div>
+                    <div class="input-group" style="flex: 1; margin: 0;">
+                        <label>Category (Optional)</label>
+                        <input 
+                            type="text" 
+                            id="searchCategory" 
+                            class="input-field" 
+                            placeholder="Filter by category"
+                        >
+                    </div>
+                    <button onclick="searchSongs()" class="btn btn-primary" style="margin-top: 21px;">
+                        🔍 Search
+                    </button>
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_ID = 'community_music_library_9e6e9b84';
+        const API_BASE = 'https://runtime.codewords.ai/run';
+        let API_KEY = localStorage.getItem('codewords_api_key') || '';
+
+        if (API_KEY) {
+            document.getElementById('apiSetup').classList.add('connected');
+            document.getElementById('apiSetup').innerHTML = `
+                <h3>✅ Connected</h3>
+                <p style="color: #1db954; margin: 8px 0;">Your account is connected and ready!</p>
+                <button onclick="disconnectApiKey()" class="btn btn-secondary">Disconnect</button>
+            `;
+            document.getElementById('mainContent').classList.remove('hidden');
+            loadLibrary();
+        }
+
+        function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!apiKey) {
+                alert('Please enter your API key');
+                return;
+            }
+            if (!apiKey.startsWith('cwk-')) {
+                alert('API key should start with "cwk-"');
+                return;
+            }
+            
+            localStorage.setItem('codewords_api_key', apiKey);
+            API_KEY = apiKey;
+            location.reload();
+        }
+
+        function disconnectApiKey() {
+            if (confirm('Disconnect your account?')) {
+                localStorage.removeItem('codewords_api_key');
+                location.reload();
+            }
+        }
+
+        function switchTab(tab, event) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('addTab').classList.add('hidden');
+            document.getElementById('libraryTab').classList.add('hidden');
+            document.getElementById('searchTab').classList.add('hidden');
+
+            if (tab === 'add') {
+                document.getElementById('addTab').classList.remove('hidden');
+            } else if (tab === 'library') {
+                document.getElementById('libraryTab').classList.remove('hidden');
+                loadLibrary();
+            } else if (tab === 'search') {
+                document.getElementById('searchTab').classList.remove('hidden');
+            }
+        }
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `
+                <div class="status-message status-${type}">
+                    <span>${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatViews(views) {
+            if (views >= 1000000) {
+                return (views / 1000000).toFixed(1) + 'M';
+            } else if (views >= 1000) {
+                return (views / 1000).toFixed(1) + 'K';
+            }
+            return views.toString();
+        }
+
+        function renderSong(song) {
+            return `
+                <div class="song-card" data-id="${song.id}">
+                    <img src="${song.thumbnail}" alt="${song.title}" class="song-thumbnail" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23404040%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23888%22 font-size=%2236%22%3E🎵%3C/text%3E%3C/svg%3E'">
+                    <div class="song-info">
+                        <div class="song-title">${song.title}</div>
+                        <div class="song-artist">${song.uploader}</div>
+                        <div class="song-meta">
+                            <span>⏱️ ${formatDuration(song.duration)}</span>
+                            <span>👁️ ${formatViews(song.view_count)} views</span>
+                            <span class="badge">${song.category}</span>
+                        </div>
+                        <audio controls preload="metadata">
+                            <source src="${song.mp3_url}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    <div class="song-actions">
+                        <button class="btn-icon" onclick="deleteSong('${song.id}')" title="Delete from library">
+                            🗑️
+                        </button>
+                        <button class="btn-icon" onclick="copyStreamUrl('${song.mp3_url}')" title="Copy streaming URL">
+                            📋
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addSong() {
+            const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+            const category = document.getElementById('category').value.trim() || 'Music';
+
+            if (!youtubeUrl) {
+                showStatus('Please enter a YouTube URL', 'error');
+                return;
+            }
+
+            const addBtn = document.getElementById('addBtn');
+            addBtn.disabled = true;
+            addBtn.textContent = '⏳ Downloading... (this may take 20-30 seconds)';
+
+            try {
+                const response = await fetch(`${API_BASE}/${SERVICE_ID}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        youtube_url: youtubeUrl,
+                        category: category
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Failed to add song');
+                }
+
+                showStatus(`✅ ${result.message}`, 'success');
+                document.getElementById('youtubeUrl').value = '';
+
+                const songHtml = renderSong(result.video);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = songHtml;
+                
+                const addSection = document.getElementById('addTab');
+                const successDiv = document.createElement('div');
+                successDiv.innerHTML = '<h3 style="margin: 30px 0 16px 0; color: #1db954;">✅ Successfully Added:</h3>';
+                
+                const oldSuccess = document.querySelector('.success-display');
+                if (oldSuccess) oldSuccess.remove();
+                
+                const container = document.createElement('div');
+                container.className = 'success-display';
+                container.appendChild(successDiv);
+                container.appendChild(tempDiv.firstElementChild);
+                addSection.appendChild(container);
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = '📥 Download & Add to Library';
+            }
+        }
+
+        async function loadLibrary() {
+            const content = document.getElementById('libraryContent');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading your library...</p></div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/${SERVICE_ID}/library`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Failed to load library');
+                }
+
+                if (result.videos.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎵</div>
+                            <h3>Your library is empty</h3>
+                            <p style="margin-top: 12px;">Start by adding some songs from YouTube!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const songsHtml = result.videos.map(renderSong).join('');
+                content.innerHTML = `
+                    <div style="color: #b3b3b3; margin-bottom: 16px; font-size: 14px;">
+                        📊 ${result.total} song${result.total !== 1 ? 's' : ''} in your collection
+                    </div>
+                    <div class="songs-grid">${songsHtml}</div>
+                `;
+
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Error loading library</h3>
+                        <p style="margin-top: 12px; color: #e84a4a;">${error.message}</p>
+                        <button onclick="loadLibrary()" class="btn btn-primary" style="margin-top: 20px;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function searchSongs() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const category = document.getElementById('searchCategory').value.trim();
+
+            if (!query) {
+                showStatus('Please enter a search query', 'error');
+                return;
+            }
+
+            const content = document.getElementById('searchResults');
+            content.innerHTML = '<div class="loading"><div class="spinner"></div><p>Searching...</p></div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/${SERVICE_ID}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        category: category || undefined
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Failed to search');
+                }
+
+                if (result.videos.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔍</div>
+                            <h3>No results found</h3>
+                            <p style="margin-top: 12px;">Try different keywords or category</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const songsHtml = result.videos.map(renderSong).join('');
+                content.innerHTML = `
+                    <div style="color: #b3b3b3; margin-bottom: 16px; font-size: 14px;">
+                        🔍 Found ${result.total} song${result.total !== 1 ? 's' : ''}
+                    </div>
+                    <div class="songs-grid">${songsHtml}</div>
+                `;
+
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h3>Search failed</h3>
+                        <p style="margin-top: 12px; color: #e84a4a;">${error.message}</p>
+                        <button onclick="searchSongs()" class="btn btn-primary" style="margin-top: 20px;">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function deleteSong(videoId) {
+            if (!confirm('Delete this song from your library?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/${SERVICE_ID}/library/${videoId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`
+                    }
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.detail || 'Failed to delete');
+                }
+
+                showStatus('Song deleted successfully', 'success');
+                
+                const songCard = document.querySelector(`[data-id="${videoId}"]`);
+                if (songCard) {
+                    songCard.style.transition = 'all 0.3s';
+                    songCard.style.opacity = '0';
+                    songCard.style.transform = 'translateX(-100px)';
+                    setTimeout(() => songCard.remove(), 300);
+                }
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function copyStreamUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showStatus('Streaming URL copied to clipboard! Share with friends 🎵', 'success');
+            }).catch(() => {
+                prompt('Copy this streaming URL:', url);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('youtubeUrl')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addSong();
+            });
+            
+            document.getElementById('searchQuery')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchSongs();
+            });
+
+            document.getElementById('apiKeyInput')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveApiKey();
+            });
+        });
+    </script>
+</body>
+</html>
